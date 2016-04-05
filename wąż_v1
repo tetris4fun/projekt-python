@@ -17,6 +17,20 @@ HEIGHT = 600#wysokosc okna
 pos_x = random.randint(0,WIDTH)
 pos_y = random.randint(0, HEIGHT)
 
+#mozliwosci ruchow (36)
+list_x = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+list_y = [0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+#wektor ruchu
+w = random.randint(0,35)
+dx = list_x[w]
+dy = list_y[w]
+
+#sciezka
+
+steps_x = []
+steps_y = []
+
+#ustawienia okna(rozmiar, tytul)
 pygame.init()
 gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Snake')
@@ -35,18 +49,40 @@ while not gameExit:
     
     
     if event.type == pygame.KEYDOWN:
-        #event w lewo
+        #strzalka w lewo
         if event.key == pygame.K_LEFT:
             print "lewo"
-        #event w prawo
+            if w == 35:
+                w = 0
+            else:
+                w += 1
+            dx = list_x[w]
+            dy = list_y[w]
+            
+        #strzalka w prawo
         if event.key == pygame.K_RIGHT:
+            if w == 0:
+                w = 35
+            else:
+                w -= 1     
             print "prawo"
+            dx = list_x[w]
+            dy = list_y[w]
+    
+    #ustalenie pozycji
+    pos_x += dx
+    pos_y += dy    
     
     
+    #pozycja sciezki
+    steps_x.append(pos_x)
+    steps_y.append(pos_y)
     
-    pygame.draw.circle(gameDisplay, white, (pos_x,pos_y), 7, 0)    
+    #rysowanie sciezki
+    for i in range(0, len(steps_x)-1):
+        pygame.draw.circle(gameDisplay, white, (steps_x[i],steps_y[i]), 6, 0)    
     
     pygame.display.update()
-    clock.tick(30)#ilosc klatek na sekunde    
+    clock.tick(20)#ilosc klatek na sekunde    
 pygame.quit()
 quit()
