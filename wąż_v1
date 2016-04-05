@@ -1,0 +1,52 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr  6 14:26:03 2016
+
+@author: piotr
+"""
+import pygame
+import random
+
+dark_grey = (41,41,41)
+white = (255,255,255)
+
+WIDTH = 800#szerokosc okna
+HEIGHT = 600#wysokosc okna
+
+#pozycja poczatkowa węża
+pos_x = random.randint(0,WIDTH)
+pos_y = random.randint(0, HEIGHT)
+
+pygame.init()
+gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Snake')
+
+clock = pygame.time.Clock()#zegar od klatek na sekunde
+
+#głowna pętka gry
+pygame.display.update()
+gameExit = False
+while not gameExit:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            gameExit = True
+    gameDisplay.fill(dark_grey)#kolor tła
+    pygame.display.update()            
+    
+    
+    if event.type == pygame.KEYDOWN:
+        #event w lewo
+        if event.key == pygame.K_LEFT:
+            print "lewo"
+        #event w prawo
+        if event.key == pygame.K_RIGHT:
+            print "prawo"
+    
+    
+    
+    pygame.draw.circle(gameDisplay, white, (pos_x,pos_y), 7, 0)    
+    
+    pygame.display.update()
+    clock.tick(30)#ilosc klatek na sekunde    
+pygame.quit()
+quit()
