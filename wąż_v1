@@ -1,34 +1,85 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr  6 14:26:03 2016
+Created on Thu Apr 14 09:10:29 2016
 
 @author: piotr
 """
 import pygame
 import random
+import math
+import numpy
+
+def vector(x0, y0,oX,oY, fi):
+    rad = math.pi/fi
+    x1 = (x0 - oX)*math.cos(rad)-(y0-oY)*math.sin(rad)+oX    
+    y1 = (x0 - oX)*math.sin(rad)+(y0-oY)*math.cos(rad)+oY      
+    return numpy.matrix([[x1],[y1]])
+
+"""funkcja tendency zwraca wartosc 1-4 dla parametrow punktow dx oraz dy
+jesli dx > 0 i dy > 0 to zwraca 1
+jesli dx < 0 i dy > 0 to zwraca 2
+jesli dx < 0 i dy < 0 to zwraca 3
+jesli dx > 0 i dy < 0 to zwraca 4
+"""
+def tendency(dx, dy):
+    if dx > 0 and dy > 0:
+        return numpy.matrix([[0],[-50]])
+    elif dx < 0 and dy > 0:
+        return numpy.matrix([[0],[-50]])
+    elif dx < 0 and dy < 0:
+        return numpy.matrix([[0],[50]])
+    elif dx > 0 and dy < 0:
+        return numpy.matrix([[0],[50]])
+    
+def wektory(kat):
+    lista = []
+    dx = 0
+    dx = 0
+    if kat < 90 and kat > 0:
+        dx = 1
+        dy = -1
+    elif kat <180 and kat > 90:
+        dx = -1
+        dy = -1
+    elif kat <270 and kat > 180:
+        dx = -1
+        dy = +1
+    elif kat < 360 and kat > 270:
+        dx = +1
+        dy = +1
+    lista.append(dx)
+    lista.append(dy)
+    return  lista
+    
+def check_for_death(x,y, WIDTH = 800, HEIGHT = 600):
+    if(x < 0 or x> WIDTH or y < 0 or y > HEIGHT):
+        return 1
+    else:    
+        return 0
 
 dark_grey = (41,41,41)
 white = (255,255,255)
-
-WIDTH = 800#szerokosc okna
-HEIGHT = 600#wysokosc okna
-
+blue = (0,0,255)
+WIDTH = 800
+HEIGHT = 600
 #pozycja poczatkowa węża
-pos_x = random.randint(0,WIDTH)
-pos_y = random.randint(0, HEIGHT)
+pos_x = random.randint(0+200,WIDTH-200)
+pos_y = random.randint(0+200, HEIGHT-200)
+#inicjalizacja 
+alfa = 0
 
-#mozliwosci ruchow (36)
-list_x = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-list_y = [0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-#wektor ruchu
-w = random.randint(0,35)
-dx = list_x[w]
-dy = list_y[w]
+#czy wcisniety
+pressed_r = 0
+pressed_l = 0
+#zmienne pozniej wyjasnic
+temp_x = temp_y = 0
 
-#sciezka
-
-steps_x = []
-steps_y = []
+dx = random.randint(-1,1)
+dy = random.randint(-1,1)
+if not dx:
+    dx = 1
+if not dy:
+    dy = 1    
 
 #ustawienia okna(rozmiar, tytul)
 pygame.init()
@@ -36,7 +87,7 @@ gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Snake')
 
 clock = pygame.time.Clock()#zegar od klatek na sekunde
-
+kat = 0
 #głowna pętka gry
 pygame.display.update()
 gameExit = False
@@ -46,43 +97,97 @@ while not gameExit:
             gameExit = True
     gameDisplay.fill(dark_grey)#kolor tła
     pygame.display.update()            
-    
+
+    pressed_r = 0
+    pressed_l = 0
     
     if event.type == pygame.KEYDOWN:
-        #strzalka w lewo
-        if event.key == pygame.K_LEFT:
-            print "lewo"
-            if w == 35:
-                w = 0
-            else:
-                w += 1
-            dx = list_x[w]
-            dy = list_y[w]
-            
-        #strzalka w prawo
+        if event.key == pygame.K_LEFT:   
+            pressed_l = 1            
+            alfa = 18
+            #if kat > 
         if event.key == pygame.K_RIGHT:
-            if w == 0:
-                w = 35
-            else:
-                w -= 1     
-            print "prawo"
-            dx = list_x[w]
-            dy = list_y[w]
-    
-    #ustalenie pozycji
-    pos_x += dx
-    pos_y += dy    
+            pressed_r = 1
+            alfa = -18
     
     
-    #pozycja sciezki
-    steps_x.append(pos_x)
-    steps_y.append(pos_y)
     
-    #rysowanie sciezki
-    for i in range(0, len(steps_x)-1):
-        pygame.draw.circle(gameDisplay, white, (steps_x[i],steps_y[i]), 6, 0)    
     
+    
+    
+    #tendencja i punkt wokol ktorego obracamy
+    if dx > 0 and dy > 0:
+        w = -50
+    elif dx < 0 and dy > 0:
+        w = -50
+    elif dx < 0 and dy < 0:
+        w = 50
+    elif dx > 0 and dy < 0:
+        w = 50
+    #zmiana kata, zmiana tendencji    
+    lista = []
+    dx = 0
+    dx = 0
+    if kat < 90 and kat >= 0:
+        dx = 1
+        dy = -1
+    elif kat <180 and kat >= 90:
+        dx = -1
+        dy = -1
+    elif kat <270 and kat >= 180:
+        dx = -1
+        dy = +1
+    elif kat <= 360 and kat >=270:
+        dx = +1
+        dy = +1
+    lista.append(dx)
+    lista.append(dy)
+    
+    
+    
+    
+   #logika kurwa 
+    if not pressed_r and not pressed_l:
+        #dx = dy = 1        
+        temp_x = pos_x
+        temp_y = pos_y   
+        oX = 0
+        oY = 0
+        #pos_x += dx
+        #pos_y += dy     
+        pos_x += lista[0]
+        pos_y += lista[1]        
+        
+        
+    elif pressed_r and not pressed_l: 
+        dx = dy = 0
+        oX = temp_x + w
+        oY = temp_y + w
+
+        kat += alfa
+        kat = kat%360 
+        print kat
+        
+        pos_x = int(round(vector(pos_x,pos_y,oX, oY, alfa)[0][0]))
+        pos_y = int(round(vector(pos_x,pos_y,oX, oY, alfa)[1][0]))
+        
+    elif pressed_l and not pressed_r:
+        dx = dy = 0
+        kat +=alfa
+        kat = kat%360
+        print kat
+
+        oX = temp_x + w
+        oY = temp_y + w
+        pos_x = int(round(vector(pos_x,pos_y,oX, oY, alfa)[0][0]))
+        pos_y = int(round(vector(pos_x,pos_y,oX, oY, alfa)[1][0]))
+    
+    #sprawdzenie, czy nie wyjechal    
+    if check_for_death(pos_x,pos_y) == 1:
+        print "koniec gry"
+    else:                
+        pygame.draw.circle(gameDisplay, white, (pos_x,pos_y), 7, 0)    
     pygame.display.update()
-    clock.tick(20)#ilosc klatek na sekunde    
+    clock.tick(15)  
 pygame.quit()
 quit()
